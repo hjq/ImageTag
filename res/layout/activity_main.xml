@@ -7,22 +7,47 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.tagimage.MainActivity" >
-    
-    <com.example.tagimage.TagImageView
-        android:id="@+id/image_layout"
-        android:layout_width="400dp"
-        android:layout_height="400dp"
-        android:background="#FFFFFF"
-        >
-        
-        
-    </com.example.tagimage.TagImageView>
 
-    
-    <Button 
-        android:layout_alignParentBottom="true"
+    <RelativeLayout
+        android:id="@+id/all_layout"
+        android:layout_width="400dp"
+        android:layout_height="400dp" >
+
+        <com.example.tagimage.TagImageView
+            android:id="@+id/image_layout"
+            android:layout_width="400dp"
+            android:layout_height="400dp"
+            android:background="#FFFFFF" >
+        </com.example.tagimage.TagImageView>
+
+        <LinearLayout
+            android:id="@+id/ll_tag_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:orientation="horizontal" >
+
+            <Button
+                android:id="@+id/btn_tag_1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="品牌"
+                android:visibility="invisible" />
+
+            <Button
+                android:id="@+id/btn_tag_2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:text="自定义"
+                android:visibility="invisible" />
+        </LinearLayout>
+    </RelativeLayout>
+
+    <Button
         android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        />
+        android:layout_alignParentBottom="true" />
+
 </RelativeLayout>

@@ -80,7 +80,6 @@ public class TagImageView extends RelativeLayout {
 						if (Math.abs(mUpInScreenX - mCurrentInScreenX) < 5 && Math.abs(mUpInScreenY - mCurrentInScreenY) < 5) {
 							deleteTag(v);
 						}
-
 						break;
 					}
 				}
@@ -92,7 +91,7 @@ public class TagImageView extends RelativeLayout {
 		setPosition(layout, dx, dy);
 		tagViewList.add(layout);
 	}
-
+	
 	private void deleteTag(View v) {
 		this.removeView(v);
 		if (tagViewList.size() != 0) {
