@@ -116,20 +116,21 @@ public class MainActivity extends Activity implements View.OnClickListener {
 	private void setPosition(View v, int dx, int dy) {
 		int parentWidth = tagImageView.getWidth();
 		int parentHeight = tagImageView.getHeight();
-		int l = v.getLeft() + dx;
-		int t = v.getTop() + dy;
-		if (l < 0)
-			l = 0;
-		else if ((l + v.getWidth()) >= parentWidth) {
+		int l, t, r, b;
+		if ((parentWidth - dx) >= v.getWidth()) {
+			l = dx;
+			r = l + v.getWidth();
+		} else {
+			r = parentWidth;
 			l = parentWidth - v.getWidth();
 		}
-		if (t < 0)
-			t = 0;
-		else if ((t + v.getHeight()) >= parentHeight) {
+		if ((parentHeight - dy) >= v.getHeight()) {
+			t = dy;
+			b = l + v.getHeight();
+		} else {
+			b = parentHeight;
 			t = parentHeight - v.getHeight();
 		}
-		int r = l + v.getWidth();
-		int b = t + v.getHeight();
 		v.layout(l, t, r, b);
 		RelativeLayout.LayoutParams params = (android.widget.RelativeLayout.LayoutParams) v.getLayoutParams();
 		params.leftMargin = l;
