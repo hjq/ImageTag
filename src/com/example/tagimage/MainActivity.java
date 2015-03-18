@@ -5,10 +5,9 @@ import java.util.List;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.support.v4.widget.SimpleCursorAdapter.ViewBinder;
+import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.widget.Button;
 import android.widget.RelativeLayout;
@@ -22,7 +21,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 	private int mDownInScreenX = 0;
 	private int mDownInScreenY = 0;
 	private boolean isExist = false;
-	
+
 	private List<RelativeLayout> markRelativeLayoutList;
 
 	@Override
@@ -68,11 +67,12 @@ public class MainActivity extends Activity implements View.OnClickListener {
 			tagImageView.removeAllViews();
 			break;
 		case R.id.btn_tag_1:
-			tagImageView.addTag("meilapp", (mDownInScreenX + 25), (mDownInScreenY - 30));
+			tagImageView.addTag("我要翻转", (mDownInScreenX + 25), (mDownInScreenY - 30));
 			swichState(true);
 			break;
 		case R.id.btn_tag_2:
-			tagImageView.removeAllViews();
+			tagImageView.addTag("我要翻转", (mDownInScreenX + 25), (mDownInScreenY - 30));
+			swichState(true);
 			break;
 		default:
 			break;
@@ -86,18 +86,24 @@ public class MainActivity extends Activity implements View.OnClickListener {
 		m_rlMark = new RelativeLayout(this);
 		m_rlMark = (RelativeLayout) View.inflate(this, R.layout.mark, null);
 		tagImageView.addView(m_rlMark);
-		setPosition(m_rlMark, mDownInScreenX, mDownInScreenY);
-		
+		m_rlMark.setVisibility(View.INVISIBLE);
+		new Handler().postDelayed(new Runnable() {
+
+			@Override
+			public void run() {
+				setPosition(m_rlMark, mDownInScreenX, mDownInScreenY);
+			}
+		}, 100);		
 		markRelativeLayoutList.add(m_rlMark);
 	}
-	
+
 	private void deleteMark() {
 		if (markRelativeLayoutList!= null && markRelativeLayoutList.size() != 0) {
 			tagImageView.removeView(markRelativeLayoutList.get(markRelativeLayoutList.size() - 1));
 		}
 		markRelativeLayoutList.remove(markRelativeLayoutList.size() - 1);
 	}
-	
+
 	private void swichState(boolean isExist) {
 		if (isExist) {
 			this.isExist = false;
@@ -110,9 +116,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
 			m_btnTagType2.setVisibility(View.VISIBLE);
 			addMark();
 		}
-		
+
 	}
-	
+
 	private void setPosition(View v, int dx, int dy) {
 		int parentWidth = tagImageView.getWidth();
 		int parentHeight = tagImageView.getHeight();
@@ -136,5 +142,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
 		params.leftMargin = l;
 		params.topMargin = t;
 		v.setLayoutParams(params);
+		v.setVisibility(View.VISIBLE);
 	}
 }

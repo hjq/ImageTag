@@ -7,7 +7,7 @@
     <TextView
         android:id="@+id/tag_text"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="30dp"
         android:background="@drawable/tag_arrow_left"
         android:gravity="center_vertical"
         android:singleLine="true"
