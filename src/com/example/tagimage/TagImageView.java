@@ -79,8 +79,8 @@ public class TagImageView extends RelativeLayout {
 						int mx = x - mDownInScreenX;
 						int my = y - mDownInScreenY;
 
-						tagTextBgChange(v, m_tvTag);
 						move(v, mx, my);
+						tagTextBgChange(v, m_tvTag, Math.abs(mx) > 10);
 						
 						mDownInScreenX = (int) event.getRawX();
 						mDownInScreenY = (int) event.getRawY();
@@ -105,7 +105,7 @@ public class TagImageView extends RelativeLayout {
 		new Handler().postDelayed(new Runnable() {
 			@Override
 			public void run() {
-				setPosition(layout, dx, dy);
+				setPosition(layout, m_tvTag, dx, dy);
 			}
 		}, 100);
 
@@ -127,13 +127,18 @@ public class TagImageView extends RelativeLayout {
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
 
-			}
+			} 
 		});
 
 		this.addView(layout);
 		layout.setVisibility(View.INVISIBLE);
 		coverCoordinates(percentX, percentY);
-		setPosition(layout, mPointX, mPointY);
+		new Handler().postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				setPosition(layout, m_tvTag, mPointX, mPointY);
+			}
+		}, 100);
 	}
 
 	private void deleteTag(View v) {
@@ -143,16 +148,18 @@ public class TagImageView extends RelativeLayout {
 		}
 	}
 
-	private void setPosition(View v, int dx, int dy) {
+	private void setPosition(View v, TextView tv, int dx, int dy) {
 		int parentWidth = this.getWidth();
 		int parentHeight = this.getHeight();
 		int l, t, r, b;
 		if ((parentWidth - dx) >= v.getWidth()) {
 			l = dx;
 			r = l + v.getWidth();
+			tv.setBackgroundResource(R.drawable.tag_arrow_left);
 		} else {
-			r = parentWidth;
-			l = parentWidth - v.getWidth();
+			r = dx;
+			l = r - v.getWidth();
+			tv.setBackgroundResource(R.drawable.tag_arrow_right);
 		}
 		if ((parentHeight - dy) >= v.getHeight()) {
 			t = dy;
@@ -194,10 +201,10 @@ public class TagImageView extends RelativeLayout {
 		v.setVisibility(View.VISIBLE);
 	}
 
-	private void tagTextBgChange(View v, TextView tv) {
-		if (v.getRight() == this.getWidth() && !isFirstArrive) {
+	private void tagTextBgChange(View v, TextView tv, boolean isNeedChange) {
+		if (v.getRight() == this.getWidth() && isNeedChange) {
 			tv.setBackgroundResource(R.drawable.tag_arrow_left);
-		} else if (v.getLeft() == 0 && !isFirstArrive) {
+		} else if (v.getLeft() == 0 && isNeedChange) {
 			tv.setBackgroundResource(R.drawable.tag_arrow_right);
 		}
 		isFirstArrive = false;
