@@ -67,11 +67,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
 			tagImageView.removeAllViews();
 			break;
 		case R.id.btn_tag_1:
-			tagImageView.addTag("我要翻转", (mDownInScreenX + 25), (mDownInScreenY - 30));
+			tagImageView.addTag(1, "翻转", (mDownInScreenX + 25), (mDownInScreenY - 30));
 			swichState(true);
 			break;
 		case R.id.btn_tag_2:
-			tagImageView.addTag("我要翻转", (mDownInScreenX + 25), (mDownInScreenY - 30));
+			tagImageView.addTag(0, "翻转", (mDownInScreenX + 25), (mDownInScreenY - 30));
 			swichState(true);
 			break;
 		default:

@@ -4,14 +4,31 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content" >
 
+    <ImageView
+        android:id="@+id/tag_iv_left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true" />
+    
     <TextView
         android:id="@+id/tag_text"
         android:layout_width="wrap_content"
         android:layout_height="30dp"
+        android:layout_toRightOf="@id/tag_iv_left"
         android:background="@drawable/tag_arrow_left"
-        android:gravity="center_vertical"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:maxEms="13"
         android:singleLine="true"
         android:text=""
         android:textColor="#FFFFFF" />
+    
+    <ImageView
+        android:id="@+id/tag_iv_right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@id/tag_text"
+        android:visibility="gone" />
 
 </RelativeLayout>

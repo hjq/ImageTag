@@ -5,27 +5,24 @@ import java.util.List;
 
 import android.R.integer;
 import android.content.Context;
-import android.graphics.Canvas;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class TagImageView extends RelativeLayout {
 
 	private Context mContext;
-	public List<View> mTagViewList;
+	public List<TagResource> mTagResList;
 	public int mPointX;
 	public int mPointY;
 	public float mPercentX;
 	public float mPercentY;
-	public int mCurDirection = 0;
-	public static final int LEFT_ARROW = 0;
-	public static final int RIGHT_ARROW = 1;
-	public boolean isFirstArrive = true;
+	int tagMaxWidth = 0;
 
 	public TagImageView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
@@ -42,15 +39,32 @@ public class TagImageView extends RelativeLayout {
 	public TagImageView(Context context) {
 		super(context);
 		// TODO Auto-generated constructor stub
+		this.mContext = context;
 	}
 
-	// 编辑图片加标签用
-	public void addTag(final String content, final int dx, final int dy) {
-		if (mTagViewList == null)
-			mTagViewList = new ArrayList<View>();
+	/**
+	 * 发话题 编辑图片添加标签
+	 * @param content
+	 * @param dx 横向坐标
+	 * @param dy 纵向坐标
+	 */
+	public void addTag(int type, final String content, final int dx, final int dy) {
+		if (mTagResList == null)
+			mTagResList = new ArrayList<TagResource>();
+		final long mId = System.currentTimeMillis() + (long) (Math.random() * 100);
+		final TagResource mTagRes = new TagResource();
+		coverToPercent(dx, dy);
+		mTagRes.id = mId;
+		mTagRes.text = content;
+		mTagRes.percentX = mPercentX;
+		mTagRes.percentY = mPercentY;
 		LayoutInflater mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View view = mInflater.inflate(R.layout.tag, null);
 		final RelativeLayout layout = (RelativeLayout) view.findViewById(R.id.tag_layout);
+		final ImageView m_ivLeft = (ImageView) view.findViewById(R.id.tag_iv_left);
+		final ImageView m_ivRight = (ImageView) view.findViewById(R.id.tag_iv_right);
+		m_ivLeft.setBackgroundResource(getTagType(type));
+		m_ivRight.setBackgroundResource(getTagType(type));
 		final TextView m_tvTag = (TextView) view.findViewById(R.id.tag_text);
 		m_tvTag.setText(content);
 
@@ -79,9 +93,10 @@ public class TagImageView extends RelativeLayout {
 						int mx = x - mDownInScreenX;
 						int my = y - mDownInScreenY;
 
-						move(v, mx, my);
-						tagTextBgChange(v, m_tvTag, Math.abs(mx) > 10);
-						
+						moveTag(v, mx, my, mId);
+						// 标签到达边界，再有往外移动的动作，才执行
+						tagTextBgChange(v, m_tvTag, m_ivLeft, m_ivRight, Math.abs(mx) > 10);
+
 						mDownInScreenX = (int) event.getRawX();
 						mDownInScreenY = (int) event.getRawY();
 						break;
@@ -90,8 +105,7 @@ public class TagImageView extends RelativeLayout {
 						mUpInScreenY = (int) event.getRawY();
 						// 模拟监听点击事件
 						if (Math.abs(mUpInScreenX - mCurrentInScreenX) < 5 && Math.abs(mUpInScreenY - mCurrentInScreenY) < 5) {
-//							deleteTag(v);
-//							tagTextBgChange(1);
+							deleteTag(v, mId);
 						}
 						break;
 					}
@@ -102,26 +116,36 @@ public class TagImageView extends RelativeLayout {
 
 		this.addView(layout);
 		layout.setVisibility(View.INVISIBLE);
+
+		// 保证 setPosition 方法在 addView 方法后调用
 		new Handler().postDelayed(new Runnable() {
 			@Override
 			public void run() {
-				setPosition(layout, m_tvTag, dx, dy);
+				setPosition(layout, m_tvTag, m_ivLeft, m_ivRight, dx, dy);
 			}
 		}, 100);
 
-		mTagViewList.add(layout);
+		mTagResList.add(mTagRes);
 	}
 
-	// 话题详情显示用
-	public void addTag(final String content,  float percentX, float percentY, int direction) {
+	/**
+	 * 话题详情页 显示标签
+	 * @param content
+	 * @param percentX 横向坐标占父view的百分比
+	 * @param percentY 纵向坐标占父view的百分比
+	 */
+	public void addTag(int type, final String content,  float percentX, float percentY) {
 		LayoutInflater mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View view = mInflater.inflate(R.layout.tag, null);
 		final RelativeLayout layout = (RelativeLayout) view.findViewById(R.id.tag_layout);
+		final ImageView m_ivLeft = (ImageView) view.findViewById(R.id.tag_iv_left);
+		final ImageView m_ivRight = (ImageView) view.findViewById(R.id.tag_iv_right);
+		m_ivLeft.setBackgroundResource(getTagType(type));
+		m_ivRight.setBackgroundResource(getTagType(type));
 		final TextView m_tvTag = (TextView) view.findViewById(R.id.tag_text);
 		m_tvTag.setText(content);
-//		tagTextBgChange(direction);
 
-		layout.setOnClickListener(new OnClickListener() {
+		m_tvTag.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
@@ -132,33 +156,56 @@ public class TagImageView extends RelativeLayout {
 
 		this.addView(layout);
 		layout.setVisibility(View.INVISIBLE);
-		coverCoordinates(percentX, percentY);
+		coverToCoordinates(percentX, percentY);
+
+		// 保证 setPosition 方法在 addView 方法后调用
 		new Handler().postDelayed(new Runnable() {
 			@Override
 			public void run() {
-				setPosition(layout, m_tvTag, mPointX, mPointY);
+				setPosition(layout, m_tvTag, m_ivLeft, m_ivRight, mPointX, mPointY);
 			}
 		}, 100);
 	}
 
-	private void deleteTag(View v) {
+	/**
+	 * 删除标签
+	 * @param v
+	 * @param id 标签id
+	 */
+	private void deleteTag(View v, long id) {
 		this.removeView(v);
-		if (mTagViewList.size() != 0) {
-			mTagViewList.remove(v);
+		if (mTagResList != null) {
+			for (int i = 0; i < mTagResList.size(); i++) {
+				if (mTagResList.get(i).id == id) {
+					mTagResList.remove(i);
+					break;
+				}
+			}
 		}
 	}
 
-	private void setPosition(View v, TextView tv, int dx, int dy) {
+	/**
+	 * 初始化，设置标签
+	 * @param v
+	 * @param tv
+	 * @param dx
+	 * @param dy
+	 */
+	private void setPosition(View v, TextView tv, ImageView iv_left, ImageView iv_right, int dx, int dy) {
 		int parentWidth = this.getWidth();
 		int parentHeight = this.getHeight();
 		int l, t, r, b;
 		if ((parentWidth - dx) >= v.getWidth()) {
 			l = dx;
 			r = l + v.getWidth();
+			iv_left.setVisibility(VISIBLE);
+			iv_right.setVisibility(GONE);
 			tv.setBackgroundResource(R.drawable.tag_arrow_left);
 		} else {
 			r = dx;
 			l = r - v.getWidth();
+			iv_left.setVisibility(GONE);
+			iv_right.setVisibility(VISIBLE);
 			tv.setBackgroundResource(R.drawable.tag_arrow_right);
 		}
 		if ((parentHeight - dy) >= v.getHeight()) {
@@ -176,7 +223,14 @@ public class TagImageView extends RelativeLayout {
 		v.setVisibility(View.VISIBLE);
 	}
 
-	private void move(View v, int dx, int dy) {
+	/**
+	 * 移动标签
+	 * @param v
+	 * @param dx 横向移动距离
+	 * @param dy 纵向移动距离
+	 * @param id 标签id
+	 */
+	private void moveTag(View v, int dx, int dy, long id) {
 		int parentWidth = this.getWidth();
 		int parentHeight = this.getHeight();
 		int l = v.getLeft() + dx;
@@ -199,21 +253,90 @@ public class TagImageView extends RelativeLayout {
 		params.topMargin = t;
 		v.setLayoutParams(params);
 		v.setVisibility(View.VISIBLE);
+
+		refreshTagRes(l, t, id);
 	}
 
-	private void tagTextBgChange(View v, TextView tv, boolean isNeedChange) {
+	/**
+	 * 标签达到边界时，再往外滑动，标签反向
+	 * @param v
+	 * @param tv
+	 * @param isNeedChange
+	 */
+	private void tagTextBgChange(View v, final TextView tv, final ImageView iv_left, final ImageView iv_right, boolean isNeedChange) {
+		final int width = tv.getWidth();
 		if (v.getRight() == this.getWidth() && isNeedChange) {
-			tv.setBackgroundResource(R.drawable.tag_arrow_left);
+			new Handler().postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					// 更换背景后，由于.9图的左右两边预留区域不一致，需要重新设置宽度，不然文字会显示不全
+					iv_left.setVisibility(VISIBLE);
+					iv_right.setVisibility(GONE);
+					tv.setBackgroundResource(R.drawable.tag_arrow_left);
+					//					tv.setWidth(width);
+				}
+			}, 100);
 		} else if (v.getLeft() == 0 && isNeedChange) {
-			tv.setBackgroundResource(R.drawable.tag_arrow_right);
+			new Handler().postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					// 更换背景后，由于.9图的左右两边预留区域不一致，需要重新设置宽度，不然文字会显示不全
+					iv_left.setVisibility(GONE);
+					iv_right.setVisibility(VISIBLE);
+					tv.setBackgroundResource(R.drawable.tag_arrow_right);
+					//					tv.setWidth(width);
+				}
+			}, 100);
 		}
-		isFirstArrive = false;
 	}
 
-	private void coverCoordinates(float percentX, float percentY) {
+	/**
+	 * 坐标换算成百分比
+	 * @param percentX
+	 * @param percentY
+	 */
+	private void coverToCoordinates(float percentX, float percentY) {
 		int parentWidth = this.getWidth();
 		int parentHeight = this.getHeight();
 		mPointX = (int) (parentWidth * percentX);
 		mPointY = (int) (parentHeight * percentY);
+	}
+
+	/**
+	 * 百分比换算成坐标
+	 * @param dx
+	 * @param dy
+	 */
+	private void coverToPercent(int dx, int dy) {
+		int parentWidth = this.getWidth();
+		int parentHeight = this.getHeight();
+		mPercentX = (float) (dx / parentWidth);
+		mPercentY = (float) (dy / parentHeight);
+	}
+
+	/**
+	 * 移动标签时，更新标签坐标
+	 * @param dx
+	 * @param dy
+	 * @param id 标签id
+	 */
+	private void refreshTagRes(int dx, int dy, long id) {
+		if (mTagResList != null) {
+			for (int i = 0; i < mTagResList.size(); i++) {
+				if (mTagResList.get(i).id == id) {
+					mTagResList.get(i).percentX = (float) (dx / this.getWidth());
+					mTagResList.get(i).percentY = (float) (dy / this.getHeight());
+					break;
+				}
+			}
+		}
+	}
+
+	private int getTagType(int type) {
+		if (type == 0) {
+			return R.drawable.topic_icon_label_custom_small;
+		} else {
+			return R.drawable.topic_icon_label_makeup_small;
+		}
 	}
 }

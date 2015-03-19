@@ -25,9 +25,11 @@ public final class R {
         public static final int icon_unread_message_dot=0x7f020001;
         public static final int tag_arrow_left=0x7f020002;
         public static final int tag_arrow_right=0x7f020003;
+        public static final int topic_icon_label_custom_small=0x7f020004;
+        public static final int topic_icon_label_makeup_small=0x7f020005;
     }
     public static final class id {
-        public static final int action_settings=0x7f08000a;
+        public static final int action_settings=0x7f08000c;
         public static final int all_layout=0x7f080000;
         public static final int btn_tag_1=0x7f080003;
         public static final int btn_tag_2=0x7f080004;
@@ -35,8 +37,10 @@ public final class R {
         public static final int image_layout=0x7f080001;
         public static final int ll_tag_group=0x7f080002;
         public static final int mark_layout=0x7f080006;
+        public static final int tag_iv_left=0x7f080009;
+        public static final int tag_iv_right=0x7f08000b;
         public static final int tag_layout=0x7f080008;
-        public static final int tag_text=0x7f080009;
+        public static final int tag_text=0x7f08000a;
         public static final int v_mark_tag=0x7f080007;
     }
     public static final class layout {
