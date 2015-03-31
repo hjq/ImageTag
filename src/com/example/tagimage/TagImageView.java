@@ -3,7 +3,6 @@ package com.example.tagimage;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.R.integer;
 import android.content.Context;
 import android.os.Handler;
 import android.util.AttributeSet;
@@ -54,10 +53,10 @@ public class TagImageView extends RelativeLayout {
 		final long mId = System.currentTimeMillis() + (long) (Math.random() * 100);
 		final TagResource mTagRes = new TagResource();
 		coverToPercent(dx, dy);
-		mTagRes.id = mId;
-		mTagRes.text = content;
-		mTagRes.percentX = mPercentX;
-		mTagRes.percentY = mPercentY;
+		mTagRes.mId = mId;
+		mTagRes.title = content;
+		mTagRes.xscale = mPercentX;
+		mTagRes.yscale = mPercentY;
 		LayoutInflater mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View view = mInflater.inflate(R.layout.tag, null);
 		final RelativeLayout layout = (RelativeLayout) view.findViewById(R.id.tag_layout);
@@ -129,7 +128,7 @@ public class TagImageView extends RelativeLayout {
 	}
 
 	/**
-	 * 话题详情页 显示标签
+	 * 话题详情页 添加单个标签
 	 * @param content
 	 * @param percentX 横向坐标占父view的百分比
 	 * @param percentY 纵向坐标占父view的百分比
@@ -168,6 +167,22 @@ public class TagImageView extends RelativeLayout {
 	}
 
 	/**
+	 * 话题详情页 批量添加标签
+	 * @param tagResList
+	 */
+	public void addAllTags(List<TagResource> tagResList) {
+		if (tagResList == null) {
+			return;
+		} else {
+			for (TagResource tagResource : tagResList) {
+				if (!tagResource.title.equals("")) {
+					addTag(tagResource.type, tagResource.title, tagResource.xscale, tagResource.yscale);
+				}
+			}
+		}
+	}
+	
+	/**
 	 * 删除标签
 	 * @param v
 	 * @param id 标签id
@@ -176,7 +191,7 @@ public class TagImageView extends RelativeLayout {
 		this.removeView(v);
 		if (mTagResList != null) {
 			for (int i = 0; i < mTagResList.size(); i++) {
-				if (mTagResList.get(i).id == id) {
+				if (mTagResList.get(i).mId == id) {
 					mTagResList.remove(i);
 					break;
 				}
@@ -269,22 +284,18 @@ public class TagImageView extends RelativeLayout {
 			new Handler().postDelayed(new Runnable() {
 				@Override
 				public void run() {
-					// 更换背景后，由于.9图的左右两边预留区域不一致，需要重新设置宽度，不然文字会显示不全
 					iv_left.setVisibility(VISIBLE);
 					iv_right.setVisibility(GONE);
 					tv.setBackgroundResource(R.drawable.tag_arrow_left);
-					//					tv.setWidth(width);
 				}
 			}, 100);
 		} else if (v.getLeft() == 0 && isNeedChange) {
 			new Handler().postDelayed(new Runnable() {
 				@Override
 				public void run() {
-					// 更换背景后，由于.9图的左右两边预留区域不一致，需要重新设置宽度，不然文字会显示不全
 					iv_left.setVisibility(GONE);
 					iv_right.setVisibility(VISIBLE);
 					tv.setBackgroundResource(R.drawable.tag_arrow_right);
-					//					tv.setWidth(width);
 				}
 			}, 100);
 		}
@@ -323,19 +334,22 @@ public class TagImageView extends RelativeLayout {
 	private void refreshTagRes(int dx, int dy, long id) {
 		if (mTagResList != null) {
 			for (int i = 0; i < mTagResList.size(); i++) {
-				if (mTagResList.get(i).id == id) {
-					mTagResList.get(i).percentX = (float) (dx / this.getWidth());
-					mTagResList.get(i).percentY = (float) (dy / this.getHeight());
+				if (mTagResList.get(i).mId == id) {
+					mTagResList.get(i).xscale = (float) (dx / this.getWidth());
+					mTagResList.get(i).yscale = (float) (dy / this.getHeight());
 					break;
 				}
 			}
 		}
 	}
 
+	// 获取标签类型相对应的锚点图标
 	private int getTagType(int type) {
-		if (type == 0) {
+		if (type == 1) {
+			// 自定义
 			return R.drawable.topic_icon_label_custom_small;
 		} else {
+			// 化妆品
 			return R.drawable.topic_icon_label_makeup_small;
 		}
 	}

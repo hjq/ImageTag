@@ -6,8 +6,8 @@
 
     <View
         android:id="@+id/v_mark_tag"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:background="@drawable/icon_unread_message_dot" />
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:background="@drawable/topic_icon_label_custom_small" />
 
 </RelativeLayout>
